@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location & SOS System - Tourist View</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Nunito:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- UI/UX VARS & KEYFRAMES (LIGHT THEME) --- */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes sos-glow {
+            0% { box-shadow: 0 0 10px #FF6347; }
+            50% { box-shadow: 0 0 30px #FF6347; }
+            100% { box-shadow: 0 0 10px #FF6347; }
+        }
+        
+        :root {
+            /* Trust & Safety Colors */
+            --color-primary: #0072E1; 
+            --color-accent-happy: #FFC300; 
+            /* Backgrounds */
+            --primary-bg: #F7F9FF; 
+            --secondary-bg: #FFFFFF; 
+            /* Text & Action */
+            --text-color: #333333;
+            --info-button-bg: #E0E0E0; 
+            --danger-color: #FF6347; 
+            --container-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--primary-bg); 
+            color: var(--text-color); 
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+        }
+
+        /* --- CORE LAYOUT FIX: FULL SCREEN FLEX --- */
+        #active-trip-view { 
+            width: 100%; 
+            height: 100%;
+            display: flex; 
+            flex-direction: column; 
+            gap: 1rem; 
+            padding: 1rem;
+        }
+        @media (min-width: 1024px) {
+            #active-trip-view {
+                flex-direction: row;
+            }
+        }
+        
+        /* Map container */
+        #map-container {
+            flex-grow: 1; 
+            height: 55%; 
+            position: relative;
+        }
+        @media (min-width: 1024px) {
+            #map-container {
+                height: 100%;
+            }
+        }
+        #tourist-map { 
+            border-radius: 12px; 
+            height: 100%; 
+            width: 100%; 
+            box-shadow: var(--container-shadow);
+        }
+        
+        /* Control panel styling */
+        #control-panel {
+            width: 100%;
+            height: 45%; 
+            flex-shrink: 0; 
+            background: var(--secondary-bg); 
+            border-radius: 12px; 
+            box-shadow: var(--container-shadow);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; 
+            border: 1px solid #EAEAEA;
+        }
+        @media (min-width: 1024px) {
+            #control-panel {
+                width: 384px; 
+                height: 100%;
+            }
+        }
+        
+        /* --- CONTROL PANEL ELEMENTS --- */
+        #control-panel h2 { 
+            font-family: 'Nunito', sans-serif; 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            margin-bottom: 1.5rem; 
+            color: var(--color-primary);
+            border-bottom: 3px solid var(--color-accent-happy); 
+            padding-bottom: 0.75rem;
+        }
+
+        /* ID Card Styling */
+        .id-card-horizontal {
+            background: linear-gradient(135deg, #0072E1, #00BCD4);
+            color: white;
+            border-radius: 10px; 
+            padding: 1rem; 
+            box-shadow: 0 4px 15px rgba(0, 114, 225, 0.3);
+            align-items: center;
+        }
+        .id-card-horizontal .name { 
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: white;
+        }
+        .id-card-horizontal .text-yellow-300 {
+            color: var(--color-accent-happy);
+        }
+
+        /* Location Info Box */
+        #location-info {
+            background: #F0F4FF; 
+            border: 1px solid var(--color-primary); 
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        #location-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--color-primary);
+        }
+        #coordinates-display {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        #accuracy-display {
+            color: #777;
+        }
+        
+        /* Location Status Display (Map Overlay) */
+        .location-status { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 0.75rem 1.25rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-weight: 600;
+            color: #444; 
+        }
+        .status-dot.active { 
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* --- SOS BUTTON DOMINANCE (The most crucial element) --- */
+        #panic-btn {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 1.8rem;
+            font-size: 1.4rem;
+            font-weight: 800;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px var(--danger-color);
+            animation: sos-glow 2s infinite; 
+            z-index: 100;
+            cursor: pointer;
+        }
+        #panic-btn:hover {
+            background-color: #d14931;
+            transform: scale(1.02);
+        }
+
+        /* Utility Buttons */
+        .control-btn {
+            background-color: var(--info-button-bg);
+            color: #333;
+            padding: 0.75rem; 
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none; 
+            cursor: pointer;
+        }
+        .control-btn:hover {
+             background-color: #C0C0C0;
+             transform: translateY(-2px);
+        }
+        .action-button-group {
+            justify-content: space-between;
+        }
+        .action-button-group a, .action-button-group button {
+            flex-grow: 1; 
+            width: 48%; 
+        }
+        .logout-link {
+            text-decoration: none;
+            color: #777;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        .logout-link:hover {
+            color: var(--danger-color);
+        }
+
+
+        /* --- SOS MODAL / ALERT SCREEN FIXES --- */
+        .sos-modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255, 255, 255, 0.85); 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s; 
+            backdrop-filter: blur(5px);
+        }
+        .sos-modal-overlay.show { 
+            opacity: 1; visibility: visible; 
+        }
+        .sos-modal { 
+            background: white; 
+            color: var(--text-color); 
+            border: 3px solid var(--danger-color);
+            box-shadow: 0 8px 30px rgba(255,99,71,0.5);
+        }
+        .sos-modal h3 {
+            color: var(--danger-color);
+        }
+        
+        #final-alert-screen { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(255, 255, 255, 0.98); 
+            z-index: 10000; 
+            display: none; 
+            justify-content: center; 
+            align-items: center;
+        }
+        #final-alert-content {
+            background: white;
+            color: var(--text-color);
+            border: 2px solid var(--danger-color);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 3rem;
+            max-width: 600px;
+        }
+        #final-alert-content h2 {
+            color: var(--danger-color);
+        }
+        #email-body-output {
+            background: #F0F0F0;
+            color: #333;
+            border: 1px solid #AAA;
+        }
+        .leaflet-popup-content-wrapper { background: white; color: var(--text-color); }
+        .leaflet-popup-tip { background: white; }
+        .leaflet-popup-content-wrapper a { color: var(--color-primary); }
+    </style>
+</head>
+<body class="w-screen h-screen">
+
+    <div id="sos-modal-overlay" class="sos-modal-overlay">
+        <div class="sos-modal p-8 rounded-xl">
+            <h3 class="text-2xl font-bold"><i class="fas fa-bell animate-pulse mr-2"></i> EMERGENCY ALERT</h3>
+            <p class="mb-6 mt-2 text-lg text-gray-700">A panic alert will be sent in <span id="modal-countdown" class="font-mono text-red-500">10</span> seconds.</p>
+            <button id="modal-cancel-btn" class="control-btn px-6 py-3 w-full rounded-full bg-green-500 hover:bg-green-600 text-white">CANCEL ALERT</button>
+        </div>
+    </div>
+    
+    <div id="final-alert-screen">
+        <div id="final-alert-content" class="rounded-xl">
+            <h2 class="text-center text-2xl font-bold mb-6"><i class="fas fa-exclamation-circle mr-2"></i> ALERT CONFIRMED & SENT</h2>
+            <p class="text-center mb-6 text-sm text-gray-700 opacity-80">The system has generated the following **Emergency Alert** and attempted to open your mail client.</p>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-red-100 border border-red-500 rounded-lg">
+                    <p class="font-bold mb-2 text-red-700"><i class="fas fa-arrow-right mr-2"></i> 1. Emergency Call Attempted:</p>
+                    <a id="call-emergency-btn" href="#" class="control-btn bg-red-600 hover:bg-red-700 text-white w-full">
+                        <i class="fas fa-phone-alt mr-2"></i> Call <span id="contact-number-display">--</span>
+                    </a>
+                </div>
+
+                <div class="p-4 bg-gray-100 border border-gray-300 rounded-lg">
+                    <p class="font-bold mb-2 text-gray-700"><i class="fas fa-envelope mr-2"></i> 2. Email Content:</p>
+                    <div id="email-body-output" class="text-xs p-2 rounded"></div>
+                    <button id="copy-email-btn" class="control-btn mt-3 bg-gray-500 hover:bg-gray-600 text-white w-full"><i class="fas fa-copy mr-1"></i> Copy Email Body</button>
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('final-alert-screen').style.display='none'; resetSosDashboard();" class="mt-8 w-full control-btn bg-gray-500 hover:bg-gray-600 text-white">
+                CLOSE & RETURN TO MAP
+            </button>
+        </div>
+    </div>
+
+    <div id="active-trip-view">
+        <div id="map-container">
+            <div id="tourist-map"></div>
+            <div id="location-status" class="location-status">
+                <span id="status-dot" class="status-dot"></span>
+                <span id="status-text">Getting location...</span>
+            </div>
+        </div>
+
+        <div id="control-panel">
+            <h2 class="mb-4"><i class="fas fa-user-shield mr-2"></i> Tourist Safety Hub</h2>
+            
+            <div id="id-card-container" class="mb-6"></div>
+
+            <div id="location-info" class="mb-6">
+                <h3 class="font-semibold mb-2"><i class="fas fa-location-arrow mr-2 text-red-500"></i> Live Position Data</h3>
+                <div id="coordinates-display" class="space-y-1">
+                    <div>Latitude: <span id="lat-display">--</span></div>
+                    <div>Longitude: <span id="lng-display">--</span></div>
+                    <div class="pt-1">
+                        <span id="accuracy-display" class="text-xs text-gray-400">Accuracy: --</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-grow">
+                </div>
+            
+            <div class="text-center mt-auto space-y-4">
+                
+                <div class="action-button-group flex">
+                    <a id="back-btn" href="central-dashboard3.html" class="control-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button id="refresh-location-btn" class="control-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                
+                <button id="center-map-btn" class="control-btn w-full">
+                    <i class="fas fa-crosshairs"></i> Center on Me
+                </button>
+                
+                <button id="panic-btn" class="w-full">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> PRESS FOR EMERGENCY ALERT
+                </button>
+                
+                <button id="logout-btn" class="w-full mt-4 text-sm logout-link">
+                    Logout & End Trip
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for tracking application state
+        const AppState = {
+            map: null,
+            marker: null,
+            locationWatcherId: null,
+            lastKnownLocation: null,
+            tourist: null,
+            safetyZonesLayer: new L.FeatureGroup()
+        };
+        let countdownTimer;
+
+        // --- Event Listeners and Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Data Initialization
+            let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (!loggedInUser) {
+                // Mock user data for testing if local storage is empty
+                loggedInUser = {
+                    id: 'TR-4932', 
+                    username: 'testuser', 
+                    name: 'Kashmiri Tourist', 
+                    contact: '+919876543210', 
+                    emergency: 'contact@example.com',
+                    password: 'password'
+                };
+            }
+            AppState.tourist = loggedInUser; 
+            
+            renderIdCard(AppState.tourist);
+            initializeTouristMap();
+            
+            // --- CRITICAL FIX: EVENT LISTENERS ---
+            // The buttons were not working because these listeners were correctly placed inside DOMContentLoaded
+            
+            // 1. SOS Button 
+            document.getElementById('panic-btn').addEventListener('click', startSosCountdown);
+
+            // 2. Utility Buttons
+            document.getElementById('modal-cancel-btn').addEventListener('click', cancelSosAlert);
+            document.getElementById('refresh-location-btn').addEventListener('click', refreshLocation);
+            document.getElementById('center-map-btn').addEventListener('click', centerMapOnUser);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+            // 3. Copy Email Button
+            document.getElementById('copy-email-btn').addEventListener('click', () => {
+                const emailContent = document.getElementById('email-body-output').textContent;
+                const bodyContent = emailContent.split('\n\n').slice(1).join('\n\n').trim();
+                navigator.clipboard.writeText(bodyContent).then(() => {
+                    alert('Email content copied to clipboard!');
+                }).catch(err => {
+                    console.error('Could not copy text: ', err);
+                });
+            });
+        });
+        
+        // --- Remaining Functions (Logic) ---
+        function setLayerStyle(layer, type) {
+            const isUnsafe = type === 'Unsafe';
+            layer.setStyle({
+                fillColor: isUnsafe ? '#dc2626' : '#22c55e',
+                color: isUnsafe ? '#991b1b' : '#15803d',
+                weight: 3,
+                fillOpacity: 0.5
+            });
+            const name = layer.feature && layer.feature.properties ? layer.feature.properties.name : 'Unknown Zone';
+            layer.bindPopup(`<b>${type} Area</b><br>${name}`);
+        }
+
+        function loadSafetyZones() {
+            AppState.safetyZonesLayer.clearLayers();
+            const zonesData = JSON.parse(localStorage.getItem('safetyZones') || '[]');
+            
+            if (zonesData.length === 0) {
+                // Mock Danger Zone data
+                const mockZone = {
+                    "type": "Feature",
+                    "properties": { "name": "Danger Zone", "type": "Unsafe" },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [77.200, 28.620], [77.215, 28.620], [77.215, 28.610], [77.200, 28.610], [77.200, 28.620]
+                        ]]
+                    }
+                };
+                zonesData.push(mockZone);
+            }
+
+            zonesData.forEach(feature => {
+                if (feature.geometry) {
+                    const layer = L.geoJSON(feature).getLayers()[0];
+                    if (layer) {
+                        layer.feature = feature; 
+                        setLayerStyle(layer, feature.properties.type);
+                        AppState.safetyZonesLayer.addLayer(layer);
+                    }
+                }
+            });
+        }
+
+        function updateLocationStatus(status, isActive = false) {
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            statusText.textContent = status;
+            if (isActive) { 
+                statusDot.classList.add('active'); 
+                document.getElementById('location-status').classList.add('bg-green-500/90', 'text-white');
+                document.getElementById('location-status').classList.remove('bg-white/95', 'text-gray-800');
+            } else { 
+                statusDot.classList.remove('active'); 
+                document.getElementById('location-status').classList.add('bg-white/95', 'text-gray-800');
+                document.getElementById('location-status').classList.remove('bg-green-500/90', 'text-white');
+            }
+        }
+
+        function updateLocationDisplay(lat, lng, accuracy = null) {
+            document.getElementById('lat-display').textContent = lat.toFixed(6);
+            document.getElementById('lng-display').textContent = lng.toFixed(6);
+            if (accuracy) { document.getElementById('accuracy-display').textContent = `Accuracy: ±${Math.round(accuracy)}m`; }
+        }
+
+        function renderIdCard(tourist) {
+            if (!tourist) return;
+            const container = document.getElementById('id-card-container');
+            const touristId = tourist.id || tourist.username; 
+            const contactNumber = tourist.contact || tourist.emergency; 
+
+            container.innerHTML = `
+                <div class="id-card-horizontal flex">
+                    <div id="qr-code-placeholder" class="qr-code mr-4 flex-shrink-0"></div>
+                    <div class="details text-left text-white flex-grow">
+                        <div class="name">${tourist.name}</div>
+                        <div>ID: <span class="text-yellow-300">${touristId}</span></div>
+                        <div class="text-xs opacity-70">Contact: ${contactNumber || 'N/A'}</div>
+                    </div>
+                </div>`;
+            
+            const qrPlaceholder = document.getElementById("qr-code-placeholder");
+            if (qrPlaceholder) {
+                qrPlaceholder.innerHTML = ''; 
+                new QRCode(qrPlaceholder, {
+                    text: JSON.stringify({ id: touristId, name: tourist.name, contact: contactNumber, timestamp: Date.now() }),
+                    width: 70, height: 70, correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+        }
+
+        function initializeTouristMap() {
+            if (AppState.map) AppState.map.remove();
+            
+            AppState.map = L.map('tourist-map').setView([28.6139, 77.2090], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(AppState.map);
+
+            AppState.map.addLayer(AppState.safetyZonesLayer);
+            loadSafetyZones(); 
+            AppState.map.invalidateSize(); 
+
+            if (!('geolocation' in navigator)) { updateLocationStatus('Geolocation not supported'); return; }
+
+            updateLocationStatus('Requesting location...', false);
+
+            // This is the call that initiates location services
+            navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError, { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 });
+            startLocationWatching();
+        }
+
+        function startLocationWatching() { AppState.locationWatcherId = navigator.geolocation.watchPosition(handleLocationSuccess, handleLocationError, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }); }
+        
+        function handleLocationSuccess(position) {
+            const { latitude, longitude, accuracy } = position.coords;
+            AppState.lastKnownLocation = { lat: latitude, lng: longitude, accuracy };
+            updateLocationStatus('Location active', true);
+            updateLocationDisplay(latitude, longitude, accuracy);
+            
+            if (!AppState.marker) {
+                const userIcon = L.divIcon({ html: `<i class="fas fa-street-view text-blue-500 text-4xl animate-pulse"></i>`, className: 'leaflet-div-icon', iconSize: [30, 40], iconAnchor: [15, 40] });
+                AppState.marker = L.marker([latitude, longitude], { icon: userIcon }).addTo(AppState.map).bindPopup('<b>You are here!</b>').openPopup();
+                AppState.map.setView([latitude, longitude], 16);
+            } else { AppState.marker.setLatLng([latitude, longitude]); }
+            AppState.map.invalidateSize(); 
+        }
+
+        function handleLocationError(error) { 
+            updateLocationStatus('Location failed', false); 
+            console.error("Geolocation error:", error); 
+        }
+
+        function centerMapOnUser() { 
+            if (AppState.lastKnownLocation) { 
+                AppState.map.setView([AppState.lastKnownLocation.lat, AppState.lastKnownLocation.lng], 17, {animate: true}); 
+                if(AppState.marker) AppState.marker.openPopup();
+            } else {
+                alert("Your location is not yet available. Try refreshing.");
+            }
+        }
+        function refreshLocation() { 
+             updateLocationStatus('Requesting location...', false);
+             navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }); 
+        }
+        
+        // --- SOS Functions ---
+        function startSosCountdown() {
+            if (!AppState.tourist) {
+                alert("Tourist data missing. Cannot start SOS.");
+                return;
+            }
+            const modalOverlay = document.getElementById('sos-modal-overlay');
+            const countdownSpan = document.getElementById('modal-countdown');
+            const panicBtn = document.getElementById('panic-btn');
+
+            modalOverlay.classList.add('show');
+            panicBtn.disabled = true;
+
+            let timeLeft = 10; 
+            countdownSpan.textContent = timeLeft;
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                countdownSpan.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    sendSosAlert();
+                }
+            }, 1000);
+        }
+
+        function cancelSosAlert() {
+            clearInterval(countdownTimer);
+            resetSosDashboard();
+        }
+
+        function sendSosAlert() {
+            if (!AppState.tourist || !AppState.lastKnownLocation) { 
+                console.error("SOS failed due to missing data.");
+                resetSosDashboard(); 
+                return; 
+            }
+
+            const { lat, lng } = AppState.lastKnownLocation;
+            const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            
+            const timestamp = new Date().toLocaleString();
+            const touristName = AppState.tourist.name;
+            const touristId = AppState.tourist.id;
+            const emergencyContact = AppState.tourist.contact || AppState.tourist.emergency; 
+            const targetEmail = 'shivanshti10@gmail.com'; 
+
+            const subject = `🚨 URGENT: PANIC ALERT from Tourist ${touristName} (ID: ${touristId})`;
+            const body = `EMERGENCY PANIC ALERT\n\n` +
+                         `Tourist Details:\n` +
+                         `Name: ${touristName}\n` +
+                         `ID: ${touristId}\n` +
+                         `Emergency Contact: ${emergencyContact || 'Not Available'}\n\n` +
+                         `Location Information:\n` +
+                         `Latitude: ${lat}\n` +
+                         `Longitude: ${lng}\n` +
+                         `Timestamp: ${timestamp}\n\n` +
+                         `Google Maps Link:\n${mapsLink}\n\n` +
+                         `This is an automated emergency alert. Please respond immediately.`;
+            
+            document.getElementById('email-body-output').textContent = `To: ${targetEmail}\nSubject: ${subject}\n\n${body}`;
+
+            document.getElementById('call-emergency-btn').href = `tel:${emergencyContact}`;
+            document.getElementById('contact-number-display').textContent = emergencyContact || 'N/A';
+
+            document.getElementById('sos-modal-overlay').classList.remove('show');
+            document.getElementById('final-alert-screen').style.display = 'flex';
+            
+            window.open(`mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+        }
+        
+        function resetSosDashboard() {
+            document.getElementById('sos-modal-overlay').classList.remove('show');
+            document.getElementById('panic-btn').disabled = false;
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('loggedInUser');
+            if (AppState.locationWatcherId) navigator.geolocation.clearWatch(AppState.locationWatcherId);
+            window.location.href = 'login.html'; 
+        }
+    </script>
+</body>
+</html>

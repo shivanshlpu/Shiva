@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Safe. Travel Happy | Smart Tourist Safety</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        /* --- FRIENDLY & TRUSTWORTHY UI/UX VARIABLES --- */
+        :root {
+            /* Trust & Safety Colors */
+            --color-primary: #0072E1; /* Strong Blue (Trust) */
+            --color-secondary: #00BCD4; /* Cyan/Teal (Clarity) */
+            /* Friendly & Motivational Colors */
+            --color-accent-happy: #FFC300; /* Yellow/Gold (Energy/CTA) */
+            --color-light-bg: #F7F9FF; /* Very Light Blue/Off-White (Friendly BG) */
+            --color-white: #FFFFFF;
+            /* Text & UI Elements */
+            --color-text-dark: #333333;
+            --color-text-soft: #555555;
+            --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* Soft Shadow */
+        }
+
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--color-light-bg);
+            color: var(--color-text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 80px;
+        }
+
+        /* --- NAVIGATION: STICKY & CLEAN --- */
+        .navbar {
+            width: 100%;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+            z-index: 1000;
+        }
+
+        .navbar h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--color-primary); 
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--color-accent-happy); 
+            margin-right: 5px;
+        }
+
+        .nav-links a {
+            color: var(--color-text-soft);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-primary); 
+        }
+
+        /* --- HERO SECTION: MOTIVATIONAL & BRIGHT --- */
+        .hero-section {
+            width: 100%;
+            height: 60vh; 
+            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 114, 225, 0.1)), 
+                        url('https://source.unsplash.com/1600x900/?safe-travel,happy-tourist') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--color-text-dark);
+            margin-bottom: 3rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-content h1 {
+            font-family: 'Nunito', sans-serif;
+            font-size: 4rem; 
+            color: var(--color-primary);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-content p {
+            font-size: 1.5rem;
+            color: var(--color-text-soft);
+            font-weight: 400;
+        }
+
+        /* --- CHOICE SECTION: CLEAN LAYOUT --- */
+        .choice-section {
+            width: 90%;
+            max-width: 1200px;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.8rem;
+            color: var(--color-primary);
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 5px;
+            background-color: var(--color-accent-happy);
+            border-radius: 5px;
+        }
+
+        .choice-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* --- CARD: FRIENDLY & CLEAR --- */
+        .card {
+            background: var(--color-white);
+            color: var(--color-text-dark);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 114, 225, 0.2);
+            border-color: var(--color-primary); 
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            color: var(--color-primary);
+            margin-bottom: 1.2rem;
+        }
+
+        .card h3 {
+            font-size: 1.6rem;
+            color: var(--color-primary);
+        }
+
+        .card p {
+            font-size: 1rem;
+            color: var(--color-text-soft);
+            opacity: 1;
+            min-height: 50px;
+        }
+
+        /* --- CTA BUTTONS: UNIFIED LOOK --- */
+        .cta-button {
+            background-color: var(--color-accent-happy); /* All buttons now use Yellow/Gold */
+            color: var(--color-text-dark);
+            border: none;
+            padding: 1rem 1.8rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 195, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .cta-button:hover {
+            background-color: #ffda6a;
+            transform: translateY(-2px); 
+        }
+
+        /* --- TRUST ELEMENTS SECTION --- */
+        .trust-element {
+            background: none; 
+            box-shadow: none; 
+            border: none; 
+            width: 250px;
+            /* Flex properties for centering content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* --- FOOTER: TRUSTWORTHY BASE --- */
+        footer {
+            width: 100%;
+            padding: 2rem 0;
+            text-align: center;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+        
+        /* --- RESPONSIVENESS (TABLET & MOBILE) --- */
+        
+        /* Tablet/Larger Mobile Screens (Max-width 1024px) */
+        @media (max-width: 1024px) {
+            .hero-content h1 { font-size: 3.5rem; }
+            .nav-links a { margin-left: 1.5rem; }
+            .choice-cards { gap: 1.5rem; }
+        }
+
+        /* Mobile Screens (Max-width 768px) */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: center;
+                padding-bottom: 1rem;
+            }
+            .nav-links {
+                margin-top: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+            .nav-links a { margin: 5px 0; }
+            
+            .hero-section { height: 40vh; margin-bottom: 2rem;}
+            .hero-content h1 { font-size: 2.5rem; }
+            .hero-content p { font-size: 1.1rem; }
+            
+            .section-title { font-size: 2rem; margin-bottom: 2rem;}
+            .choice-section { padding: 2rem 5%; }
+            .card { max-width: 100%; }
+            
+            /* Trust element stacking */
+            .choice-cards div { width: 100%; margin-bottom: 1.5rem; }
+            .trust-element { margin-bottom: 1.5rem !important; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <i class="fas fa-route logo-icon"></i>
+            <h1>SafeJourney Connect</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Safety Tips</a>
+            <a href="#">Verified Guides</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <div class="hero-content">
+            <h1>Explore with Confidence. We’re with you, every step of the way. ✈️</h1>
+            <p>Your safety is our priority. Choose your portal to begin your secure adventure.</p>
+        </div>
+    </main>
+
+    <section class="choice-section">
+        <h2 class="section-title">Quick Start: Choose Your Access Portal</h2>
+
+        <div class="choice-cards">
+            
+            <div class="card" id="tourist-card">
+                <i class="fas fa-map-marked-alt card-icon"></i>
+                <h3>Tourist / Solo Traveler</h3>
+                <p>Register or Login to plan your safe routes, access SOS, and share live location.</p>
+                <button class="cta-button" onclick="window.location.href = 'tourist-registration.html';">Start My Trip</button>
+            </div>
+
+            
+            <div class="card" id="guide-card">
+                <i class="fas fa-shield-alt card-icon"></i>
+                <h3>Tour Guide / Admin</h3>
+                <p>Manage tourist groups, verify member IDs, and provide instant safety support.</p>
+                <button class="cta-button" onclick="window.location.href = 'guide-registration.html';">Manage Tours</button>
+            </div>
+
+            
+            <div class="card" id="individual-card">
+                <i class="fas fa-users card-icon"></i>
+                <h3>Small Group / Family</h3>
+                <p>Register a private group for shared safety alerts and real-time monitoring among members.</p>
+                <button class="cta-button" onclick="window.location.href = 'individual-registration.html';">Register Group</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="choice-section" style="padding-top: 1rem;">
+        <h2 class="section-title">Why SafeJourney Connect?</h2>
+        <div class="choice-cards" style="gap: 3rem;">
+            <div class="trust-element">
+                <i class="fas fa-lock card-icon" style="color: var(--color-primary);"></i>
+                <h3 style="font-size: 1.4rem; color: var(--color-primary);">Data Security</h3>
+                <p style="color: var(--color-text-soft);">🔒all personal and location data.</p>
+            </div>
+            <div class="trust-element">
+                <i class="fas fa-certificate card-icon" style="color: var(--color-primary);"></i>
+                <h3 style="font-size: 1.4rem; color: var(--color-primary);">Verified Guides</h3>
+                <p style="color: var(--color-text-soft);">✅ Only certified and background-checked guides allowed on the platform.</p>
+            </div>
+            <div class="trust-element">
+                <i class="fas fa-phone-volume card-icon" style="color: var(--color-primary);"></i>
+                <h3 style="font-size: 1.4rem; color: var(--color-primary);">24/7 SOS</h3>
+                <p style="color: var(--color-text-soft);">🚨 Instant alert to local authorities and emergency contacts.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 SafeJourney Connect. Travel Securely. Powered by Trust.</p>
+    </footer>
+
+    <script>
+        // Simple script for any future micro-interactions
+    </script>
+</body>
+
+</html>

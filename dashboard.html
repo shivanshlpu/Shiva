@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Dashboard - SafeTour Connect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* --- LIGHT/TRUSTWORTHY GUIDE DASHBOARD PALETTE --- */
+        :root {
+            /* Trust & Safety Colors */
+            --color-primary: #0072E1;
+            --color-secondary: #00BCD4;
+            --color-accent-happy: #FFC300;
+            
+            /* Backgrounds */
+            --primary-bg: #F7F9FF;
+            --secondary-bg: #FFFFFF;
+            
+            /* Text & Status */
+            --text-color-dark: #333333;
+            --text-color-soft: #555555;
+            --danger-color: #FF6347;
+            --success-color: #28A745;
+            --warning-color: #FF8C00;
+            --container-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--secondary-bg);
+            padding: 1rem 3rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            border-bottom: 3px solid var(--color-primary);
+        }
+        .navbar h1 {
+            color: var(--color-primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+        }
+        .logo-icon {
+            color: var(--color-accent-happy);
+            margin-right: 0.5rem;
+        }
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logout-btn:hover {
+            background-color: #d14931;
+            transform: translateY(-2px);
+        }
+        .container {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            width: 100%;
+            flex-grow: 1;
+        }
+        .guide-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .stat-card {
+            background-color: var(--secondary-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--container-shadow);
+            border: 1px solid #E0E0E0;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 1rem;
+            color: var(--text-color-soft);
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+        }
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .stat-card .stat-value i {
+            font-size: 1.5rem;
+            color: var(--color-secondary);
+        }
+        .list-card {
+            background-color: var(--secondary-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--container-shadow);
+            margin-bottom: 2rem;
+            border: 1px solid #E0E0E0;
+        }
+        .list-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--color-primary);
+            font-weight: 700;
+            border-bottom: 1px solid #E0E0E0;
+            padding-bottom: 10px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: white;
+            background-color: var(--color-primary);
+            position: sticky;
+            top: 0;
+            border: none;
+            font-size: 0.9rem;
+        }
+        th:first-child { border-radius: 8px 0 0 8px; }
+        th:last-child { border-radius: 0 8px 8px 0; }
+        td {
+            padding: 1rem;
+            text-align: left;
+            background-color: #F8F8F8;
+            color: var(--text-color-dark);
+            border-top: 1px solid #E0E0E0;
+            border-bottom: 1px solid #E0E0E0;
+            font-size: 0.95rem;
+        }
+        tr:hover td {
+            background-color: #EFEFEF;
+        }
+        td:first-child { border-radius: 8px 0 0 8px; border-left: 1px solid #E0E0E0; }
+        td:last-child { border-radius: 0 8px 8px 0; border-right: 1px solid #E0E0E0; }
+
+        .action-cell {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .action-btn {
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .select-btn { background-color: var(--success-color); }
+        .select-btn:hover { background-color: #219641; }
+        .deselect-btn { background-color: var(--warning-color); }
+        .deselect-btn:hover { background-color: #e68a00; }
+        .delete-btn { background-color: var(--danger-color); }
+        .delete-btn:hover { background-color: #d14931; }
+        
+        .final-submit { margin-top: 2.5rem; text-align: center; }
+        #final-submit-btn {
+            width: 100%;
+            max-width: 500px;
+            padding: 1.2rem 2rem;
+            font-size: 1.2rem;
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 114, 225, 0.4);
+        }
+        #final-submit-btn:hover {
+            background-color: #0088ff;
+            transform: translateY(-3px);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            background-color: var(--secondary-bg);
+            color: var(--text-color-soft);
+            border-top: 1px solid #E0E0E0;
+            margin-top: 2rem;
+        }
+        /* Custom Alert Pop-up */
+        .custom-alert-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; 
+            align-items: center; z-index: 2000; visibility: hidden; opacity: 0; 
+            transition: opacity 0.3s ease-in-out;
+        }
+        .custom-alert-overlay.visible { visibility: visible; opacity: 1; }
+        .custom-alert-box {
+            background-color: var(--secondary-bg); padding: 2.5rem; border-radius: 15px; 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); max-width: 450px; width: 90%; 
+            border-top: 5px solid var(--danger-color);
+            color: var(--text-color-dark);
+        }
+        .custom-alert-box h3 { color: var(--danger-color); font-size: 1.5rem; }
+        .alert-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        .alert-buttons .alert-delete-btn { background-color: var(--danger-color); }
+        .alert-buttons .alert-cancel-btn { background-color: #E0E0E0; color: var(--text-color-dark); border: 1px solid #AAA; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem 1.5rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .navbar h1 { font-size: 1.5rem; }
+            .guide-stats { grid-template-columns: 1fr; }
+            .list-card { padding: 1rem; }
+            th, td { padding: 0.75rem 0.5rem; font-size: 0.85rem; }
+            .action-cell { flex-direction: column; gap: 0.4rem; }
+            .action-btn { padding: 0.4rem 0.6rem; font-size: 0.75rem; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <i class="fas fa-chart-line logo-icon"></i> <h1>GUIDE CONTROL PANEL</h1>
+        </div>
+        <button class="logout-btn" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </header>
+
+    <div class="container">
+        <div class="guide-info">
+            <h2 style="color: var(--text-color-dark); margin-bottom: 1.5rem;">Welcome, <span id="guide-name" style="color: var(--color-primary);">Guide</span>!</h2>
+        </div>
+        
+        <div class="guide-stats">
+            <div class="stat-card">
+                <h3>Current Group Name</h3>
+                <p class="stat-value" id="guide-groupName">--</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Assigned Members</h3>
+                <p class="stat-value" id="guide-groupMembers">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Unassigned Tourists</h3>
+                <p class="stat-value" id="unassigned-count">--</p>
+            </div>
+            <div class="stat-card">
+                <h3>Emergency Contact</h3>
+                <p class="stat-value" id="guide-emergency" style="font-size: 1.5rem;">--</p>
+            </div>
+        </div>
+
+        <div class="list-card">
+            <h2><i class="fas fa-list-alt" style="margin-right: 10px;"></i>Available Tourists for Assignment</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>City/Country</th>
+                            <th>Destination</th>
+                            <th>Mobile No.</th>
+                            <th>Card Type</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tourist-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="final-submit">
+            <button id="final-submit-btn">
+                <i class="fas fa-check-circle"></i> Finalize Tourist Group & Generate IDs
+            </button>
+            
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Smart Tourist Safety System | Admin Access Only
+    </footer>
+
+    <div id="custom-alert" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <h3><i class="fas fa-trash-alt"></i> Confirm Deletion</h3>
+            <p id="alert-message">Are you sure you want to permanently remove this tourist from the system? This action cannot be undone.</p>
+            <div class="alert-buttons">
+                <button class="action-btn alert-delete-btn" id="confirm-delete">Delete Permanently</button>
+                <button class="action-btn alert-cancel-btn" id="cancel-delete">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000'; // Server URL
+        
+        let guide = JSON.parse(localStorage.getItem('loggedInUser'));
+        
+        // SECURITY CHECK
+        if (!guide || guide.role !== 'guide') {
+            window.location.href = 'guide-login.html';
+            return;
+        }
+
+        // We use guide._id (MongoDB's default ID)
+        const guideId = guide._id; 
+
+        let allTourists = []; // This will hold ALL tourists fetched from the server
+        let selectedTourists = []; // Tourists selected/deselected in the current session (staging area)
+
+        const tableBody = document.getElementById('tourist-table-body');
+        const customAlert = document.getElementById('custom-alert');
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        let touristToDeleteId = null;
+
+        // --- STATS HELPER ---
+        function updateStatCounts() {
+            // 1. Update the 'Total Assigned Members' to reflect the current session selection
+            document.getElementById('guide-groupMembers').innerText = selectedTourists.length;
+
+            // 2. Calculate and update truly unassigned count (tourists with no guideId in the full list)
+            const unassignedCount = allTourists.filter(t => !t.guideId).length;
+            document.getElementById('unassigned-count').innerText = unassignedCount;
+        }
+
+        // --- FETCH GUIDE DATA ---
+        async function syncGuideData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/guide/${guideId}`);
+                if (response.ok) {
+                    const latestGuide = await response.json();
+                    guide = latestGuide; 
+                    localStorage.setItem('loggedInUser', JSON.stringify(guide));
+
+                    document.getElementById('guide-name').innerText = guide.name || 'N/A';
+                    document.getElementById('guide-groupName').innerText = guide.groupName || 'N/A';
+                    document.getElementById('guide-emergency').innerText = guide.emergency || 'N/A';
+                }
+            } catch (error) {
+                console.error('Failed to sync guide data:', error);
+                document.getElementById('guide-name').innerText = 'Sync Error';
+            }
+        }
+
+        // --- FETCH TOURIST DATA ---
+        async function fetchTourists() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/tourists/all`); 
+                if (!response.ok) {
+                    throw new Error('Failed to fetch tourists from server.');
+                }
+                const data = await response.json();
+                
+                allTourists = data; // Store all records from DB
+
+                // Initialize selectedTourists to include only those currently assigned to THIS guide in the DB
+                selectedTourists = data.filter(t => t.guideId === guideId); 
+
+                updateTable();
+
+            } catch (error) {
+                console.error('Error fetching tourist data:', error);
+                document.getElementById('unassigned-count').innerText = 'Error';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--danger-color); padding: 20px;">Failed to load tourist data from server.</td></tr>';
+            }
+        }
+
+        // --- RENDER TABLE ---
+        function updateTable() {
+            tableBody.innerHTML = '';
+            
+            // Show only tourists who are currently unassigned OR already assigned to THIS guide.
+            const touristsToDisplay = allTourists.filter(t => !t.guideId || t.guideId === guideId);
+            
+            updateStatCounts(); // Update the dynamic stat cards
+
+            if (touristsToDisplay.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-color-soft); padding: 20px;">No available tourists for assignment.</td></tr>';
+                return;
+            }
+
+            touristsToDisplay.forEach(t => {
+                const recordId = t.id || t._id; 
+                
+                // Check if the current tourist is marked as selected in the local staging area
+                const isSelected = selectedTourists.some(st => (st.id || st._id) === recordId); 
+                
+                const cardTypeColor = (t.cardType === 'Platinum' || t.cardType === 'Diamond') ? 'var(--color-primary)' : 'var(--text-color-soft)';
+
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${t.name || 'N/A'}</td>
+                    <td>${t.city || 'N/A'}</td>
+                    <td>${t.destination || 'N/A'}</td>
+                    <td>${t.mobile || 'N/A'}</td>
+                    <td><span style="font-weight: 600; color: ${cardTypeColor}">${t.cardType || 'Gold'}</span></td>
+                    <td class="action-cell">
+                        <button class="action-btn ${isSelected ? 'deselect-btn' : 'select-btn'}" data-id="${recordId}">
+                            <i class="fas fa-${isSelected ? 'minus' : 'plus'}"></i> ${isSelected ? 'Deselect' : 'Select'}
+                        </button>
+                        <button class="action-btn delete-btn" data-id="${recordId}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                // Event delegation for select/deselect
+                row.querySelector('.select-btn, .deselect-btn').addEventListener('click', (event) => {
+                    const id = event.target.closest('button').dataset.id;
+                    const touristRecord = allTourists.find(at => (at.id || at._id) === id); 
+                    const isCurrentlySelected = selectedTourists.some(st => (st.id || st._id) === id);
+
+                    if (isCurrentlySelected) {
+                        // Deselect: Remove from the local selection array
+                        selectedTourists = selectedTourists.filter(st => (st.id || st._id) !== id);
+                    } else if (touristRecord) {
+                        // Select: Add to the local selection array
+                        selectedTourists.push(touristRecord);
+                    }
+                    updateTable(); // Re-render to update buttons and counts
+                });
+
+                // Event delegation for delete (Opens confirmation modal)
+                row.querySelector('.delete-btn').addEventListener('click', (event) => {
+                    touristToDeleteId = event.target.closest('button').dataset.id;
+                    customAlert.classList.add('visible');
+                    const name = allTourists.find(t => (t.id || t._id) === touristToDeleteId)?.name || 'this tourist';
+                    document.getElementById('alert-message').innerText = `Are you sure you want to permanently remove ${name} from the system? This action cannot be undone.`;
+                });
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // --- DELETE LOGIC (API Integration) ---
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!touristToDeleteId) return;
+
+            try {
+                // DELETE API call
+                const response = await fetch(`${API_BASE_URL}/api/tourists/delete/${touristToDeleteId}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.status === 404) {
+                    alert('Tourist already removed or ID not found.');
+                } else if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Deletion failed on the server.');
+                }
+
+                // Success: Remove locally and refresh UI quickly
+                allTourists = allTourists.filter(t => (t.id || t._id) !== touristToDeleteId);
+                selectedTourists = selectedTourists.filter(st => (st.id || st._id) !== touristToDeleteId);
+                
+                alert('Tourist deleted successfully!');
+                customAlert.classList.remove('visible');
+                touristToDeleteId = null;
+                
+                updateTable(); // Re-render based on new local state
+                await syncGuideData(); // Resync guide data (optional, but safe)
+
+            } catch (error) {
+                console.error('Deletion Error:', error);
+                alert(`Deletion Error: ${error.message || error}`);
+                customAlert.classList.remove('visible');
+            }
+        });
+
+        cancelDeleteBtn.addEventListener('click', () => {
+            touristToDeleteId = null;
+            customAlert.classList.remove('visible');
+        });
+
+        // --- FINAL SUBMIT LOGIC (Assignment to Guide) ---
+        document.getElementById('final-submit-btn').addEventListener('click', async () => {
+            if (selectedTourists.length === 0) {
+                alert('Please select at least one tourist to finalize the group.');
+                return;
+            }
+            
+            // Prepare bulk update payload
+            const updates = selectedTourists.map(t => ({
+                id: t.id || t._id, 
+                data: {
+                    guideId: guideId, // Assigning the current guide's MongoDB _id
+                }
+            }));
+            
+            const updatePayload = { updates: updates };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/tourists/update-batch`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to assign tourists on the server.');
+                }
+                
+                // Success actions
+                await syncGuideData();
+
+                alert(`Group finalized! ${selectedTourists.length} tourists assigned to ${guide.name}. Redirecting to ID Generation page.`);
+                
+                // Store only the *assigned* tourists locally for the next page's reference
+                localStorage.setItem('selectedForVirtualID', JSON.stringify(selectedTourists));
+                
+                window.location.href = 'tourist-id-generation.html';
+
+            } catch (error) {
+                console.error('Finalization Error:', error);
+                alert(`Group finalization failed. Server error: ${error.message || error}`);
+            }
+        });
+
+        // --- LOGOUT ---
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'guide-login.html';
+        });
+
+        // Initial Data Load
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Sync guide data first to get latest group name/emergency contact
+            syncGuideData(); 
+            // 2. Then fetch and display the tourists
+            fetchTourists(); 
+        });
+    </script>
+</body>
+</html>

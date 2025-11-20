@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tourist Safety System</title>
+
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #fdfdfd;
+      color: #333;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 10%;
+      background: #ffffffd9;
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0088cc;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: #0088cc;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      padding: 80px 10%;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      opacity: 0;
+      transition: opacity 2s ease-in;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+    }
+
+    .cta-buttons .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+
+    .btn.tourist {
+      background: #ffcc00;
+      color: #333;
+    }
+
+    .btn.tourist:hover {
+      background: #ffdd44;
+    }
+
+    .btn.guide {
+      background: #ffffff;
+      color: #0072ff;
+    }
+
+    .btn.guide:hover {
+      background: #eaf4ff;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 60px 10%;
+      text-align: center;
+    }
+
+    .features h2 {
+      font-size: 2rem;
+      margin-bottom: 40px;
+      color: #0072ff;
+    }
+
+    .feature-cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      width: 280px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card span {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: #0088cc;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      padding: 60px 10%;
+      background: #f5faff;
+      text-align: center;
+    }
+
+    .testimonials h2 {
+      color: #0072ff;
+      margin-bottom: 30px;
+    }
+
+    .testimonial-cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .t-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .t-card h4 {
+      margin-top: 10px;
+      color: #0088cc;
+    }
+
+    /* Footer */
+    footer {
+      padding: 20px;
+      text-align: center;
+      background: #0072ff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">🛡️ SafeTravel</div>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Tourist</a></li>
+        <li><a href="#">Guide</a></li>
+        <li><a href="#">Safety Tips</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Travel Safe. Travel Happy ✈️</h1>
+      <p>Your journey, our responsibility. Explore with confidence, anywhere.</p>
+      <div class="cta-buttons">
+        <a href="#" class="btn tourist">I'm a Tourist</a>
+        <a href="#" class="btn guide">I'm a Guide</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2>Why Choose SafeTravel?</h2>
+    <div class="feature-cards">
+      <div class="card">
+        <span>📍</span>
+        <h3>Live Location</h3>
+        <p>Share your real-time location with trusted contacts for safety.</p>
+      </div>
+      <div class="card">
+        <span>🆘</span>
+        <h3>Emergency SOS</h3>
+        <p>One-tap SOS button to alert authorities & contacts instantly.</p>
+      </div>
+      <div class="card">
+        <span>🪪</span>
+        <h3>Virtual ID</h3>
+        <p>Carry a secure digital ID with permissions & QR code access.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <h2>Trusted by Travelers</h2>
+    <div class="testimonial-cards">
+      <div class="t-card">
+        <p>"This website gave me so much confidence to travel alone in a new city!"</p>
+        <h4>- Riya, Mumbai</h4>
+      </div>
+      <div class="t-card">
+        <p>"As a guide, I can easily manage my group and ensure everyone’s safety."</p>
+        <h4>- Arjun, Jaipur</h4>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 SafeTravel. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    // Small animation for Hero Section
+    document.addEventListener("DOMContentLoaded", () => {
+      const heroText = document.querySelector(".hero h1");
+      setTimeout(() => {
+        heroText.style.opacity = 1;
+      }, 300);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Map Dashboard - Mark Safety Zones</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Nunito:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- LIGHT/FRIENDLY UI/UX VARS --- */
+        :root {
+            --color-primary: #0072E1; 
+            --color-secondary: #00BCD4; 
+            --color-accent-happy: #FFC300; 
+            --primary-bg: #F7F9FF; 
+            --secondary-bg: #FFFFFF; 
+            --text-color-dark: #333333;
+            --text-color-soft: #555555;
+            --danger-color: #FF6347;
+            --button-utility: #E0E0E0;
+            --container-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; 
+            background-color: var(--primary-bg); 
+            color: var(--text-color-dark); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            margin: 0;
+        }
+        /* --- LAYOUT --- */
+        #map-container { display: flex; flex-grow: 1; }
+        #map { flex-grow: 1; }
+        #control-panel { 
+            width: 380px; 
+            flex-shrink: 0; 
+            background: var(--secondary-bg); 
+            padding: 1.5rem; 
+            overflow-y: auto; 
+            border-left: 1px solid #EAEAEA;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        /* --- CONTROL PANEL ELEMENTS --- */
+        .control-panel-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--color-accent-happy); 
+        }
+        .control-panel-header h2 {
+            font-size: 1.8rem;
+            color: var(--text-color-dark);
+            font-weight: 800;
+        }
+        .control-panel-header a {
+            color: var(--color-primary); 
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .control-panel-header a:hover {
+            color: var(--color-secondary);
+        }
+
+        #user-info { 
+            background-color: #F0F4FF; 
+            border: 1px solid var(--color-primary);
+            color: var(--text-color-dark);
+        }
+        #user-info strong { color: var(--color-primary); }
+        #user-info p { color: var(--text-color-soft); }
+
+        #location-display-panel {
+            background: var(--secondary-bg);
+            border: 1px solid #DDD;
+            color: var(--text-color-dark);
+        }
+        #location-display-panel h3 {
+            color: var(--color-primary);
+        }
+        #location-display-panel p {
+            color: var(--text-color-soft);
+        }
+        .status-green { color: #28a745; }
+        .status-orange { color: #fd7e14; }
+        .status-red { color: var(--danger-color); }
+
+        /* --- BUTTON GROUP FIXES --- */
+        .btn-group {
+            border-top: 1px solid #E0E0E0;
+            padding-top: 1.5rem;
+            display: flex;
+            flex-direction: column; 
+            gap: 0.75rem; 
+        }
+        .action-btn {
+            width: 100%; 
+            padding: 0.75rem; 
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-color-dark);
+            background-color: var(--button-utility);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .action-btn:hover { background-color: #C0C0C0; transform: translateY(-3px); }
+        
+        .btn-recenter i, .btn-refresh i { color: var(--color-primary); }
+
+        .btn-save { 
+            background-color: var(--color-primary); 
+            color: white; 
+            font-weight: 700;
+            font-size: 1.05rem;
+            padding: 0.9rem;
+        }
+        .btn-save:hover { background-color: #0088ff; transform: translateY(-3px); }
+        .btn-logout { background-color: #6c757d; color: white; }
+        .btn-logout:hover { background-color: #5a6268; }
+
+        /* --- ZONES LIST --- */
+        .safety-list h3 { 
+            color: var(--color-primary);
+            border-bottom: 1px solid #E0E0E0; 
+        }
+        #safety-zones-list { border: 1px solid #E0E0E0; background: #F8F8F8; }
+        .safety-list .safe { background-color: rgba(40, 167, 69, 0.1); border-left: 5px solid #28a745; }
+        .safety-list .unsafe { background-color: rgba(255, 99, 71, 0.1); border-left: 5px solid var(--danger-color); }
+        .list-name { color: var(--text-color-dark); }
+        .delete-btn { color: var(--danger-color); }
+
+        /* --- MODALS --- */
+        .zone-modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.6); 
+            display: none; 
+            justify-content: center; align-items: center; z-index: 20000;
+        }
+        .delete-confirm-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.6); 
+            display: none; 
+            justify-content: center; align-items: center; z-index: 20001;
+        }
+        
+        /* --- RESPONSIVENESS FIX --- */
+        @media (max-width: 768px) {
+            #map-container { flex-direction: column; }
+            #map { height: 60vh; }
+            #control-panel { 
+                width: 100%; 
+                height: 40vh; 
+                border-left: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="map-container">
+    <div id="map"></div>
+    
+    <div id="control-panel">
+        <div class="control-panel-header flex justify-between items-center">
+            <h2 class="text-2xl font-bold"><i class="fas fa-map-marker-alt mr-2"></i> Zone Manager</h2>
+            <a href="central-dashboard2.html" title="Go to Dashboard" class="back-link flex items-center space-x-1" style="color: var(--color-primary);">
+                <i class="fas fa-arrow-left"></i> <span>Back</span>
+            </a>
+        </div>
+        
+        <div id="user-info" class="rounded-lg p-3 mb-4">
+            <p><strong>Guide:</strong> <span id="guide-name" class="guide-name-display">N/A</span></p>
+            <p class="text-gray-400 text-sm"><strong>Instructions:</strong> Use the drawing tools to mark and define areas.</p>
+        </div>
+
+        <div id="location-display-panel" class="rounded-lg p-3 mb-4">
+            <h3 class="flex items-center">
+                <i class="fas fa-satellite-dish mr-2" style="color: var(--color-primary);"></i> Live GPS Status
+            </h3>
+            <p>Lat: <span id="lat-display" class="font-mono">--</span>, Lng: <span id="lng-display" class="font-mono">--</span></p>
+            <p>Accuracy: &plusmn;<span id="accuracy-display">--</span>m</p>
+            <p class="mt-1">Status: <span id="status-text" class="status-orange">Initializing...</span></p> 
+            <p class="mt-2 text-red-400 text-xs" id="location-error-status" style="display:none;"></p>
+        </div>
+        
+        <div class="btn-group">
+            <button id="recenter-btn" class="action-btn btn-recenter">
+                <i class="fas fa-crosshairs"></i> Center Map on Me
+            </button>
+            <button id="refresh-btn" class="action-btn btn-refresh">
+                <i class="fas fa-sync-alt"></i> Refresh Map/GPS
+            </button>
+            <button id="save-zones-btn" class="action-btn btn-save">
+                <i class="fas fa-save"></i> Save All Safety Zones
+            </button>
+            <button id="logout-btn" class="action-btn btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <h3 class="safety-list-header text-xl font-bold mb-2" style="color: var(--color-primary);">Marked Zones (<span id="zone-count">0</span>)</h3>
+        <div id="safety-zones-list" class="safety-list rounded-lg">
+            <div>Loading zones from server...</div>
+        </div>
+    </div>
+</div>
+
+<div id="zone-modal-overlay" class="zone-modal-overlay">
+    <div class="zone-modal p-6 rounded-lg" style="background: var(--secondary-bg); color: var(--text-color-dark);">
+        <h3 class="text-xl font-bold mb-4" style="color: var(--color-primary);"><i class="fas fa-edit mr-2"></i> Define Zone Properties</h3>
+        <form id="zone-form">
+            <input type="text" id="zone-name-input" placeholder="Zone Name (e.g., Central Park)" class="w-full p-3 rounded-lg border mb-3" style="border-color: #DDD; color: var(--text-color-dark);" required>
+            
+            <select id="zone-type-select" class="w-full p-3 rounded-lg border mb-3" style="border-color: #DDD; color: var(--text-color-dark);">
+                <option value="Safe">Safe Zone (Green)</option>
+                <option value="Unsafe">Unsafe Zone (Red)</option>
+            </select>
+            
+            <div class="modal-buttons flex justify-end gap-3 mt-4">
+                <button type="button" id="modal-cancel-btn" class="modal-cancel-btn p-2 rounded-lg" style="background-color: #6c757d; color: white;">Cancel</button>
+                <button type="submit" class="modal-confirm-btn p-2 rounded-lg" style="background-color: var(--color-primary); color: white;">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="delete-confirm-overlay" class="delete-confirm-overlay">
+    <div class="delete-confirm-modal p-6 rounded-lg" style="background: var(--secondary-bg); color: var(--text-color-dark);">
+        <i class="fas fa-exclamation-triangle text-4xl mb-3" style="color: var(--danger-color);"></i>
+        <h3 class="text-xl font-bold mb-2" style="color: var(--danger-color);">Confirm Deletion</h3>
+        <p class="mb-6" style="color: var(--text-color-soft);">Are you sure you want to delete the zone: <span id="zone-to-delete-name" class="font-semibold" style="color: var(--color-primary);"></span>?</p>
+        
+        <div class="delete-modal-buttons flex justify-center gap-3">
+            <button type="button" id="delete-cancel-btn" class="action-btn btn-cancel p-2 rounded-lg" style="background-color: #6c757d; color: white;">Cancel</button>
+            <button type="button" id="delete-confirm-btn" class="action-btn btn-delete p-2 rounded-lg" style="background-color: var(--danger-color); color: white;">
+                <i class="fas fa-trash-alt"></i>Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:3000'; // Server URL
+
+    const INITIAL_VIEW = [28.6139, 77.2090]; 
+    let lastKnownGuideLocation = null; 
+
+    const AppState = {
+        guide: null, 
+        map: null,
+        drawnItems: new L.FeatureGroup(),
+        safetyData: [], // Data fetched from server
+        userMarker: null,
+        userAccuracyCircle: null,
+        zoneToDeleteId: null 
+    };
+
+    let tempNewLayer = null; 
+
+    // --- Geolocation Functions ---
+    function handleLocationError(error) {
+        document.getElementById('lat-display').textContent = 'N/A';
+        document.getElementById('lng-display').textContent = 'N/A';
+        document.getElementById('accuracy-display').textContent = 'N/A';
+        document.getElementById('status-text').textContent = "Failed";
+        document.getElementById('status-text').className = "status-red";
+        document.getElementById('location-error-status').style.display = 'block';
+
+        if (error.code === 1) {
+            document.getElementById('location-error-status').textContent = "Permission Denied. Please enable GPS and allow location access.";
+        } else {
+            document.getElementById('location-error-status').textContent = "GPS is blocked or unavailable.";
+        }
+        console.error("Geolocation Error:", error);
+    }
+
+    function handleLocationSuccess(position) {
+        const { latitude, longitude, accuracy } = position.coords;
+        const latLng = [latitude, longitude];
+        lastKnownGuideLocation = latLng;
+
+        document.getElementById('lat-display').textContent = latitude.toFixed(6);
+        document.getElementById('lng-display').textContent = longitude.toFixed(6);
+        document.getElementById('accuracy-display').textContent = accuracy.toFixed(0);
+        document.getElementById('status-text').textContent = "Live";
+        document.getElementById('status-text').className = "status-green";
+        document.getElementById('location-error-status').style.display = 'none';
+
+        if (AppState.userMarker) {
+            AppState.userMarker.setLatLng(latLng);
+            AppState.userAccuracyCircle.setLatLng(latLng);
+            AppState.userAccuracyCircle.setRadius(accuracy);
+        } else {
+            const guideIcon = L.divIcon({
+                className: 'guide-icon',
+                html: '<i class="fas fa-user-circle text-2xl" style="color: var(--color-primary);"></i>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+            AppState.userMarker = L.marker(latLng, { icon: guideIcon }).addTo(AppState.map)
+                .bindPopup("Your Location (Guide)").openPopup();
+            AppState.userAccuracyCircle = L.circle(latLng, accuracy, {
+                color: 'var(--color-primary)', weight: 1, fillColor: 'var(--color-primary)', fillOpacity: 0.15
+            }).addTo(AppState.map);
+            AppState.map.setView(latLng, 16); 
+        }
+        AppState.map.invalidateSize(); 
+    }
+
+    function startGeolocation() {
+        if (!('geolocation' in navigator)) { 
+            document.getElementById('status-text').textContent = "GPS Not Supported";
+            return;
+        }
+        document.getElementById('status-text').textContent = "Requesting Location...";
+        document.getElementById('status-text').className = "status-orange";
+        navigator.geolocation.watchPosition(handleLocationSuccess, handleLocationError, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    }
+
+    // --- Map and Zone Functions (Local Rendering) ---
+    function setLayerStyle(layer, type) {
+        const isUnsafe = type === 'Unsafe';
+        layer.setStyle({
+            fillColor: isUnsafe ? '#dc2626' : '#22c55e',
+            color: isUnsafe ? '#991b1b' : '#15803d',
+            weight: 3,
+            fillOpacity: 0.5
+        });
+        const name = layer.feature && layer.feature.properties ? layer.feature.properties.name : 'New Zone';
+        layer.bindPopup(`<b>${type} Area</b><br>${name}`);
+    }
+
+    function renderSafetyList() {
+        const listContainer = document.getElementById('safety-zones-list');
+        listContainer.innerHTML = '';
+        
+        if (AppState.safetyData.length === 0) {
+            listContainer.innerHTML = '<div class="p-3 text-center text-gray-500">Use the drawing tools on the map to mark areas.</div>';
+        }
+
+        AppState.safetyData.forEach((feature) => {
+            const name = feature.properties.name;
+            const type = feature.properties.type;
+            // Use the correct zone ID for deletion
+            const id = feature.properties.id || feature.properties.zoneId; 
+
+            const div = document.createElement('div');
+            div.className = `${type === 'Unsafe' ? 'unsafe' : 'safe'} flex justify-between items-center px-4 py-2 cursor-pointer transition`;
+            div.innerHTML = `
+                <div class="flex items-center space-x-2 overflow-hidden">
+                    <span class="list-name truncate">${name}</span> 
+                    <span class="list-type">(${type})</span>
+                </div>
+                <button onclick="removeZoneByFeatureId('${id}')" title="Delete Zone" class="delete-btn">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            `;
+            listContainer.appendChild(div);
+        });
+        document.getElementById('zone-count').textContent = AppState.safetyData.length;
+    }
+
+    // --- SERVER FETCH LOGIC ---
+    async function fetchSafetyZones() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/zones`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch zones.');
+            }
+            const data = await response.json();
+            
+            // Critical: Clear and redraw map
+            AppState.drawnItems.clearLayers();
+            AppState.safetyData = [];
+
+            // Filter zones to show only those belonging to the current guide (or all if admin)
+            const guideId = AppState.guide._id;
+            const filteredZones = data.filter(zone => zone.guideId === guideId); // Filter is done on frontend here
+
+            filteredZones.forEach(zone => {
+                if (zone.geoJson) {
+                    const feature = zone.geoJson;
+                    const layer = L.geoJSON(feature).getLayers()[0];
+                    if (layer) {
+                        // Ensure properties are transferred back to the layer for editing/saving
+                        feature.properties.id = zone.zoneId;
+                        feature.properties.name = zone.name;
+                        feature.properties.type = zone.type;
+                        layer.feature = feature; 
+                        setLayerStyle(layer, feature.properties.type);
+                        AppState.drawnItems.addLayer(layer);
+                        AppState.safetyData.push(feature); // Update local state with server data
+                    }
+                }
+            });
+            renderSafetyList();
+        } catch (error) {
+            console.error('Error fetching zones from server:', error);
+            document.getElementById('safety-zones-list').innerHTML = `<div class="p-3 text-center text-red-500">Failed to load existing zones from server.</div>`;
+        }
+    }
+
+    // --- SERVER SAVE LOGIC ---
+    async function saveSafetyZones() {
+        if (!AppState.guide || !AppState.guide._id) {
+            alert('Cannot save: Guide ID is missing. Please log in again.');
+            return;
+        }
+        
+        const guideId = AppState.guide._id;
+
+        const zonesToSave = [];
+        AppState.drawnItems.eachLayer(layer => {
+            const feature = layer.toGeoJSON();
+            feature.properties = layer.feature.properties || {};
+            
+            // Use existing or generate new unique ID
+            const zoneId = feature.properties.id || feature.properties.zoneId || 'ZONE-' + Date.now();
+
+            zonesToSave.push({
+                zoneId: zoneId,
+                name: feature.properties.name || 'Unnamed Zone',
+                type: feature.properties.type || 'Safe',
+                geoJson: feature,
+                guideId: guideId
+            });
+        });
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/zones/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guideId: guideId, zones: zonesToSave })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Server returned an error.');
+            }
+
+            alert('Safety zones successfully saved to the server!');
+            fetchSafetyZones(); 
+
+        } catch (error) {
+            console.error('SERVER SAVE FAILED:', error);
+            alert('Error saving zones: ' + error.message);
+        }
+    }
+
+    // --- Modal Handlers and Utility Functions ---
+    function confirmZoneDeletion() {
+        const id = AppState.zoneToDeleteId;
+        if (!id) return;
+        
+        // Remove from local map and array
+        AppState.drawnItems.eachLayer(function(layer) {
+            if (layer.feature && layer.feature.properties && (layer.feature.properties.id === id || layer.feature.properties.zoneId === id)) {
+                AppState.drawnItems.removeLayer(layer); 
+            }
+        });
+        AppState.safetyData = AppState.safetyData.filter(f => (f.properties.id || f.properties.zoneId) !== id);
+        
+        // Hide modal and save the new reduced set to the server
+        document.getElementById('delete-confirm-overlay').style.display = 'none';
+        AppState.zoneToDeleteId = null;
+
+        saveSafetyZones(); 
+        renderSafetyList(); 
+    }
+
+    function handleZoneModalSubmit(e) {
+        e.preventDefault();
+        const zoneName = document.getElementById('zone-name-input').value.trim();
+        const zoneType = document.getElementById('zone-type-select').value;
+        
+        if (!zoneName || !tempNewLayer) {
+            alert("Zone name is required.");
+            return;
+        }
+
+        const feature = tempNewLayer.toGeoJSON();
+        feature.properties = tempNewLayer.feature?.properties || {}; 
+        
+        feature.properties.id = feature.properties.id || 'ZONE-' + Date.now();
+        feature.properties.name = zoneName;
+        feature.properties.type = zoneType;
+        feature.properties.guideId = AppState.guide._id; 
+
+        tempNewLayer.feature = feature; 
+        
+        setLayerStyle(tempNewLayer, zoneType);
+        AppState.drawnItems.addLayer(tempNewLayer);
+        
+        AppState.safetyData.push(feature); 
+        
+        document.getElementById('zone-modal-overlay').style.display = 'none';
+        document.getElementById('zone-form').reset();
+        tempNewLayer = null; 
+
+        renderSafetyList();
+    }
+
+    function handleZoneModalCancel() {
+        if (tempNewLayer) {
+            AppState.map.removeLayer(tempNewLayer);
+            tempNewLayer = null;
+        }
+        document.getElementById('zone-modal-overlay').style.display = 'none';
+        document.getElementById('zone-form').reset();
+    }
+    
+    function handleDeletion(e) {
+        renderSafetyList();
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('loggedInUser');
+        window.location.href = 'guide-login.html'; 
+    }
+
+    window.removeZoneByFeatureId = function(id) {
+        const zone = AppState.safetyData.find(f => (f.properties.id || f.properties.zoneId) === id);
+        if (!zone) return;
+
+        AppState.zoneToDeleteId = id;
+        document.getElementById('zone-to-delete-name').textContent = zone.properties.name;
+        document.getElementById('delete-confirm-overlay').style.display = 'flex';
+    }
+    
+    function recenterMapOnGuide() {
+        if (lastKnownGuideLocation) {
+            AppState.map.setView(lastKnownGuideLocation, 16);
+        } else {
+            AppState.map.setView(INITIAL_VIEW, 13);
+            alert('GPS location not yet available. Centering on default location.');
+        }
+    }
+
+    function refreshMapAndData() {
+        document.getElementById('status-text').textContent = "Refreshing...";
+        document.getElementById('status-text').className = "status-orange";
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                handleLocationSuccess(position);
+                fetchSafetyZones(); 
+                alert('Map and GPS refreshed!');
+            },
+            (error) => {
+                handleLocationError(error);
+                alert('Refresh failed. Check location permissions.');
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    }
+
+    // --- DOM Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        
+        if (!loggedInUser || !loggedInUser.username) {
+             window.location.href = 'guide-login.html';
+             return;
+        } else {
+            AppState.guide = { ...loggedInUser, _id: loggedInUser._id || loggedInUser.id };
+        }
+        document.getElementById('guide-name').textContent = AppState.guide.name || AppState.guide.username;
+
+        AppState.map = L.map('map').setView(INITIAL_VIEW, 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(AppState.map);
+        
+        AppState.map.addLayer(AppState.drawnItems);
+
+        const drawControl = new L.Control.Draw({
+            edit: { 
+                featureGroup: AppState.drawnItems,
+                poly: { allowIntersection: false }
+            },
+            draw: {
+                polygon: { shapeOptions: { color: 'gray' } },
+                polyline: false, 
+                rectangle: { shapeOptions: { color: 'gray' } },
+                circle: { shapeOptions: { color: 'gray' } }, 
+                marker: false, 
+                circlemarker: false
+            }
+        });
+        AppState.map.addControl(drawControl);
+
+        // --- Event Listeners ---
+        AppState.map.on(L.Draw.Event.CREATED, function (e) {
+            tempNewLayer = e.layer;
+            document.getElementById('zone-modal-overlay').style.display = 'flex';
+        });
+        AppState.map.on('draw:edited', (e) => {
+            e.layers.each(function (layer) {
+                setLayerStyle(layer, layer.feature.properties.type);
+            });
+            renderSafetyList(); 
+        });
+        AppState.map.on('draw:deleted', handleDeletion);
+
+        document.getElementById('zone-form').addEventListener('submit', handleZoneModalSubmit);
+        document.getElementById('modal-cancel-btn').addEventListener('click', handleZoneModalCancel);
+        document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+            document.getElementById('delete-confirm-overlay').style.display = 'none';
+            AppState.zoneToDeleteId = null;
+        });
+        document.getElementById('delete-confirm-btn').addEventListener('click', confirmZoneDeletion);
+        
+        // Bind server functions to buttons
+        document.getElementById('save-zones-btn').addEventListener('click', saveSafetyZones);
+        document.getElementById('logout-btn').addEventListener('click', handleLogout);
+        document.getElementById('recenter-btn').addEventListener('click', recenterMapOnGuide); 
+        document.getElementById('refresh-btn').addEventListener('click', refreshMapAndData); 
+
+        // Initial Data Load
+        fetchSafetyZones();
+        startGeolocation(); 
+    });
+</script>
+
+</body>
+</html>

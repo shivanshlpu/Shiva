@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Individual Login - SafeTour Connect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* --- LIGHT/TRUSTWORTHY LOGIN PALETTE --- */
+        :root {
+            /* Brand Colors */
+            --color-primary: #0072E1; /* Strong Blue (Trust, CTA) */
+            --color-accent-happy: #FFC300; /* Yellow/Gold (Highlight) */
+            --primary-bg: #F7F9FF; /* Light Blue/Off-White BG */
+            --form-bg: #FFFFFF; /* Crisp White Form BG */
+            
+            /* Text & Status */
+            --text-color-dark: #333333;
+            --text-color-soft: #555555;
+            --error-color: #FF6347;
+            --info-color: #6C757D; /* Gray/Utility color */
+            --input-border: #E0E0E0; /* Light Gray border */
+            --container-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Soft, clean light gradient */
+            background: linear-gradient(135deg, var(--primary-bg), #FFFFFF);
+            color: var(--text-color-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+        .login-container {
+            background: var(--form-bg);
+            padding: 3rem;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--container-shadow);
+            animation: fadeIn 1.2s ease-in-out;
+            border-top: 5px solid var(--color-primary); /* Blue accent line */
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .header h2 {
+            font-size: 2rem;
+            color: var(--color-primary);
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--color-primary);
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color-soft);
+            transition: color 0.3s ease;
+        }
+        input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 45px;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background-color: var(--primary-bg);
+            font-size: 1rem;
+            color: var(--text-color-dark);
+            transition: all 0.3s ease;
+        }
+        input::placeholder {
+            color: var(--text-color-soft);
+        }
+        input:focus {
+            outline: none;
+            border: 1px solid var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 114, 225, 0.3);
+            background-color: white;
+        }
+        .input-group input:focus + i {
+            color: var(--color-primary);
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            padding: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-login {
+            background-color: var(--color-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 114, 225, 0.4);
+        }
+        .btn-login:hover {
+            background-color: #0056e6;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 114, 225, 0.6);
+        }
+        .btn-home {
+            background-color: var(--info-color);
+            color: white;
+            border: 2px solid var(--info-color);
+        }
+        .btn-home:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+            transform: translateY(-1px);
+        }
+        footer {
+            margin-top: auto;
+            padding-top: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            color: var(--text-color-soft);
+            padding-bottom: 20px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* Custom Alert Styling */
+        .custom-alert-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center; z-index: 2000;
+            visibility: hidden; opacity: 0; transition: opacity 0.3s ease-in-out;
+        }
+        .custom-alert-overlay.visible { visibility: visible; opacity: 1; }
+        .custom-alert-box {
+            background: var(--form-bg);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px; width: 90%;
+            border-top: 5px solid var(--color-primary);
+            color: var(--text-color-dark);
+        }
+        #alert-title {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        #alert-title.error {
+            color: var(--error-color);
+        }
+        #alert-message {
+            margin-bottom: 1.5rem; opacity: 0.9;
+        }
+        .alert-buttons .alert-ok-btn {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+        .alert-buttons .alert-ok-btn.error {
+            background-color: var(--error-color);
+        }
+        @media (max-width: 500px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+            .login-btn, .home-btn {
+                font-size: 1rem;
+            }
+            .header h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="header">
+            <i class="fas fa-users logo-icon"></i>
+            <h2>Individual Group Login</h2>
+        </div>
+        
+        <form id="individual-login-form">
+            <div class="input-group">
+                <input type="text" id="individual-username" placeholder="Enter Group Username" required>
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="individual-password" placeholder="Enter Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit" id="individual-login-btn" class="btn login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Secure Login
+                </button>
+                <a href="home.html" class="btn home-btn">
+                    <i class="fas fa-home"></i> Go to Home Page
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <footer>
+        <i class="fas fa-lock"></i> Individual Access Only | &copy; 2025 SafeTour Connect
+    </footer>
+    
+    <div id="custom-alert" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <h3 id="alert-title"></h3>
+            <p id="alert-message"></p>
+            <div class="alert-buttons">
+                <button class="alert-ok-btn" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:3000'; // Server URL
+        
+        const customAlert = document.getElementById('custom-alert');
+        const alertTitle = document.getElementById('alert-title');
+        const alertMessage = document.getElementById('alert-message');
+        const alertOkBtn = document.getElementById('alert-ok');
+
+        function showAlert(title, message, isError = false, redirect = false, redirectUrl = '') {
+            alertTitle.innerHTML = `<i class="fas fa-${isError ? 'exclamation-triangle' : 'check-circle'}"></i> ${title}`;
+            alertTitle.classList.toggle('error', isError);
+            alertOkBtn.classList.toggle('error', isError);
+            alertMessage.textContent = message;
+            customAlert.classList.add('visible');
+            
+            alertOkBtn.onclick = () => {
+                customAlert.classList.remove('visible');
+                if (redirect) {
+                    window.location.href = redirectUrl;
+                }
+            };
+        }
+
+        document.getElementById('individual-login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = document.getElementById('individual-username').value.trim();
+            const password = document.getElementById('individual-password').value.trim();
+            
+            // --- Server Integration ---
+            fetch(`${API_BASE_URL}/api/login/individual-group`, { // Role is 'individual-group'
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // This handles 401 (Invalid credentials) or 403 (Access Denied - group size too small)
+                    return Promise.reject('Invalid username or password, or access denied.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Success: Save admin data locally for session management
+                localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+                
+                showAlert('Login Successful!', 'Redirecting to group dashboard...', false, true, 'central-dashboard4.html');
+            })
+            .catch(error => {
+                // Show specific error message
+                showAlert('Login Failed', error, true);
+            });
+            // --- End Server Integration ---
+        });
+
+        document.getElementById('alert-ok').addEventListener('click', () => {
+            document.getElementById('custom-alert').classList.remove('visible');
+            if (document.getElementById('alert-title').textContent.includes('Failed')) {
+                document.getElementById('individual-password').value = '';
+                document.getElementById('individual-password').focus();
+            }
+        });
+    </script>
+</body>
+</html>

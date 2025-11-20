@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourist Hub - SafeTour Connect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- FRIENDLY, LIGHT THEME PALETTE --- */
+        
+        :root {
+            /* Trust & Safety Colors */
+            --color-primary: #0072E1; /* Strong Blue (Main Brand/Accent) */
+            --color-accent-happy: #FFC300; /* Yellow/Gold (Highlight) */
+            /* Backgrounds */
+            --primary-bg: #F7F9FF; /* Very Light Blue/Off-White */
+            --secondary-bg: #FFFFFF; /* White for Card/Container */
+            /* Text & Action */
+            --text-color-dark: #333333;
+            --danger-color: #FF6347; /* RED: Used ONLY for SOS button and Logout */
+            --button-blue: #4A69BB; /* Secondary Blue for ID */
+            --container-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            padding-top: 5.5rem;
+        }
+        
+        /* ------------------- Navbar ------------------- */
+        .navbar {
+            width: 100%;
+            padding: 1rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--secondary-bg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .navbar h1 {
+            font-size: 1.8rem;
+            color: var(--color-primary);
+            font-weight: 800;
+        }
+        .navbar i.fas.fa-route {
+            color: var(--color-accent-happy);
+            font-size: 1.5rem;
+            margin-right: 5px;
+        }
+        .logout-btn {
+            background-color: var(--danger-color);
+            border: none;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logout-btn:hover {
+            background-color: #d14931;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 99, 71, 0.3);
+        }
+
+        /* ------------------- Main Container (NO ANIMATION) ------------------- */
+        .container {
+            text-align: center;
+            background: var(--secondary-bg);
+            padding: 3rem;
+            border-radius: 15px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: var(--container-shadow);
+            border-top: 5px solid var(--color-primary);
+        }
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-weight: 800;
+            color: var(--text-color-dark);
+            line-height: 1.2;
+        }
+        .welcome-highlight {
+            color: var(--color-primary);
+        }
+
+        /* ------------------- Dashboard Options ------------------- */
+        .dashboard-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .dashboard-btn {
+            border: none;
+            color: white;
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+        }
+        .dashboard-btn i {
+            font-size: 1.8rem;
+        }
+        
+        /* 1. PRIMARY ACTION: SOS/Safety (RED - Highest visual priority) */
+        .sos-btn {
+            background: var(--danger-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(255, 99, 71, 0.6);
+        }
+        .sos-btn:hover {
+            background: #d14931;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 99, 71, 0.7);
+        }
+
+        /* 2. SECONDARY ACTION: Virtual ID (Blue/Trust) */
+        .id-btn {
+            background-color: var(--color-primary);
+            font-weight: 700;
+        }
+        .id-btn:hover {
+            background-color: #0088ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 114, 225, 0.4);
+        }
+
+        /* ------------------- Media Queries ------------------- */
+        @media (max-width: 500px) {
+            .navbar {
+                padding: 1rem 1.5rem;
+                flex-direction: column;
+                gap: 10px;
+                padding-bottom: 15px;
+            }
+            .navbar h1 {
+                font-size: 1.5rem;
+            }
+            .container {
+                padding: 2rem 1.5rem;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            .dashboard-btn {
+                padding: 1.2rem;
+                font-size: 1.1rem;
+                flex-direction: row;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <h1><i class="fas fa-route"></i> Tourist Hub</h1>
+        <button class="logout-btn" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </header>
+    
+    <div class="container">
+        <h2 id="welcome-message">Your Safe Adventure Starts Here, <span class="welcome-highlight">Traveler!</span></h2>
+        
+        <div class="dashboard-options">
+            
+            <a href="activeusermap.html" class="dashboard-btn sos-btn">
+                <i class="fas fa-shield-alt"></i> ACTIVATE LIVE SAFETY & SOS
+            </a>
+            
+            <a href="tourist-dashboard.html" class="dashboard-btn id-btn">
+                <i class="fas fa-id-card-alt"></i> View/Download Virtual ID Card
+            </a>
+            
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            const welcomeElement = document.getElementById('welcome-message');
+
+            // --- USER CHECK & REDIRECT ---
+            if (!loggedInUser || !loggedInUser.username) {
+                 // If no user object is found, redirect to login (Server integrated)
+                 window.location.href = 'login.html';
+                 return;
+            }
+
+            // --- WELCOME MESSAGE ---
+            let userName = loggedInUser.name || loggedInUser.username;
+            
+            // Set welcome message content
+            welcomeElement.innerHTML = `Your Safe Adventure Starts Here, <span class="welcome-highlight">${userName}!</span>`;
+            
+            // Handle Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('loggedInUser');
+                // Redirect back to the login page
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html>

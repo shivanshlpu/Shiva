@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate IDs - SafeTour Connect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* --- LIGHT/TRUSTWORTHY VIRTUAL ID GENERATION PALETTE --- */
+        :root {
+            --color-primary: #0072E1;
+            --color-accent-happy: #FFC300;
+            --primary-bg: #F7F9FF;
+            --secondary-bg: #FFFFFF;
+            --text-color-dark: #333333;
+            --text-color-soft: #555555;
+            --danger-color: #FF6347;
+            --success-color: #28A745; 
+            --container-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg), #FFFFFF);
+            color: var(--text-color-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 6rem;
+            padding-bottom: 0;
+        }
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.2rem 3rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 3px solid var(--color-primary);
+        }
+        .navbar h1 {
+            color: var(--color-primary);
+            font-weight: 700;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar i {
+             color: var(--color-accent-happy);
+        }
+        .navbar-links button, .navbar-links a {
+            background: none;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .navbar-links button:hover, .navbar-links a:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+        .container {
+            flex-grow: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            padding-bottom: 40px;
+        }
+        /* --- Tourist Card Styling --- */
+        .tourist-card {
+            background: var(--secondary-bg);
+            padding: 2rem;
+            border-radius: 18px;
+            box-shadow: var(--container-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid #E0E0E0;
+            position: relative;
+        }
+        .tourist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .tourist-card h3 {
+            color: var(--text-color-dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .tourist-card p {
+            margin-bottom: 0.3rem;
+            opacity: 0.8;
+            color: var(--text-color-soft);
+            font-size: 0.9rem;
+        }
+        .tourist-card .id-detail-label {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        .tourist-card .id-section {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #E0E0E0;
+            width: 100%;
+        }
+        .qr-code-container {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: #F8F8F8;
+            border-radius: 8px;
+            display: inline-block;
+            border: 1px solid #E0E0E0;
+             /* Enforce size for QR code canvas */
+            width: 100px; 
+            height: 100px; 
+            overflow: hidden;
+        }
+        .generate-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .generate-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .generated-message {
+            color: var(--success-color);
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+        footer {
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            background-color: var(--secondary-bg);
+            flex-shrink: 0;
+            margin-top: auto;
+            color: var(--text-color-soft);
+            border-top: 1px solid #E0E0E0;
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: center;
+                padding: 1rem;
+            }
+            .navbar-links {
+                margin-top: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            .navbar-links button, .navbar-links a {
+                margin: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <h1><i class="fas fa-id-card mr-2" style="color: var(--color-accent-happy);"></i> Generate Virtual IDs</h1>
+        <div class="navbar-links">
+            <a href="central-dashboard2.html" id="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: var(--color-primary);">Finalizing Tourist Credentials</h2>
+        <div class="card-grid" id="tourist-cards-container">
+            </div>
+    </div>
+
+    <footer>
+        &copy; 2025 SafeTour Connect
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000'; // Server URL
+        
+        // --- DATA STATE AND FETCH LOGIC ---
+        const container = document.getElementById('tourist-cards-container');
+        const guide = JSON.parse(localStorage.getItem('loggedInUser'));
+
+        let currentAssignedTourists = []; // Array to hold the live data fetched from server
+
+        if (!guide || !guide._id) {
+             container.innerHTML = '<p style="text-align:center; padding: 50px; font-size: 1.2rem; color: var(--danger-color);">Authentication failed. Please log in again.</p>';
+             document.getElementById('back-btn').href = 'guide-login.html';
+             return;
+        }
+
+
+        // 1. Fetch the list of tourists assigned to this guide
+        async function fetchAssignedTourists() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/tourists/by-guide/${guide._id}`);
+                
+                if (response.status === 404) {
+                    currentAssignedTourists = [];
+                    renderTouristCards();
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error('Server error while fetching assigned members.');
+                }
+                
+                currentAssignedTourists = await response.json();
+                renderTouristCards();
+
+            } catch (error) {
+                console.error('Error fetching assigned tourists:', error);
+                container.innerHTML = '<p style="text-align:center; padding: 50px; font-size: 1.2rem; color: var(--danger-color);">Failed to connect to the server or load assigned tourists.</p>';
+            }
+        }
+        
+
+        const generateQrCode = (virtualID, touristId) => {
+            const qrCodeData = JSON.stringify({ ...virtualID, touristId: touristId }); 
+            const qrCodeContainer = document.getElementById(`qr-code-container-${touristId}`);
+            
+            if (qrCodeContainer) {
+                qrCodeContainer.innerHTML = ''; 
+                new QRCode(qrCodeContainer, {
+                    text: qrCodeData,
+                    width: 90,
+                    height: 90,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        };
+
+        const renderTouristCards = () => {
+            container.innerHTML = '';
+            if (currentAssignedTourists.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding: 50px; font-size: 1.2rem; color: var(--text-color-soft);">No tourists were found assigned to your group.</p>';
+                return;
+            }
+
+            currentAssignedTourists.forEach((tourist) => {
+                const hasVirtualID = tourist.virtualID && tourist.virtualID.id;
+                
+                const card = document.createElement('div');
+                card.classList.add('tourist-card');
+                
+                const cardInnerHtml = `
+                    <h3>${tourist.name}</h3>
+                    <p><span class="id-detail-label">Username:</span> ${tourist.username || 'N/A'}</p>
+                    <p><span class="id-detail-label">Destination:</span> ${tourist.destination || 'N/A'}</p>
+                    
+                    <button class="generate-btn" data-id="${tourist._id}" style="${hasVirtualID ? 'display: none;' : ''}">
+                        <i class="fas fa-id-card"></i> Generate Virtual ID
+                    </button>
+                    
+                    <div class="id-section ${hasVirtualID ? '' : 'hidden'}" id="id-section-${tourist._id}">
+                        <p class="generated-message"><i class="fas fa-check-circle"></i> ID Generated Successfully</p>
+                        <p><span class="id-detail-label">V-ID:</span> <span class="virtual-id-number">${hasVirtualID ? tourist.virtualID.id : 'N/A'}</span></p>
+                        <p><span class="id-detail-label">Card Type:</span> <span class="card-type">${tourist.cardType || 'Gold'}</span></p>
+                        <p><span class="id-detail-label">Permissions:</span> <span class="permissions">${hasVirtualID ? tourist.virtualID.permissions : 'N/A'}</span></p>
+                        <div class="qr-code-container" id="qr-code-container-${tourist._id}"></div>
+                    </div>
+                `;
+                
+                card.innerHTML = cardInnerHtml;
+                container.appendChild(card);
+                
+                if (hasVirtualID) {
+                    generateQrCode(tourist.virtualID, tourist._id);
+                }
+            });
+        };
+
+        // --- Event Listener for Generating ID (Server Update) ---
+        document.addEventListener('click', (event) => {
+            const target = event.target.closest('.generate-btn');
+            if (!target) return;
+
+            const touristId = target.dataset.id;
+            const tourist = currentAssignedTourists.find(t => t._id === touristId);
+
+            if (!tourist) return;
+
+            // 1. Create the new Virtual ID object
+            const virtualID = {
+                id: 'VRT-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                permissions: 'All Public Zones, Central Area Access',
+                liveLocation: 'Enabled',
+                cardType: tourist.cardType || 'Gold',
+                name: tourist.name
+            };
+
+            // 2. Prepare data for the server update
+            const updatePayload = {
+                updates: [{
+                    id: tourist._id, // Use MongoDB _id for updating the record
+                    data: {
+                        virtualID: virtualID
+                    }
+                }]
+            };
+
+            // 3. Send update to the server API
+            fetch(`${API_BASE_URL}/api/tourists/update-batch`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatePayload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => Promise.reject(data.message));
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Success: Update the local array and UI
+                const touristIndex = currentAssignedTourists.findIndex(t => t._id === touristId);
+                if (touristIndex !== -1) {
+                    currentAssignedTourists[touristIndex].virtualID = virtualID;
+                }
+                
+                // CRITICAL: We need to re-render or update the specific card element
+                const cardElement = target.closest('.tourist-card');
+                const idSection = cardElement.querySelector('.id-section');
+                
+                idSection.querySelector('.virtual-id-number').textContent = virtualID.id;
+                idSection.querySelector('.permissions').textContent = virtualID.permissions;
+                idSection.querySelector('.card-type').textContent = virtualID.cardType;
+                
+                idSection.classList.remove('hidden');
+                target.style.display = 'none';
+                generateQrCode(virtualID, tourist._id);
+                
+                alert(`${tourist.name}'s Virtual ID (${virtualID.id}) has been successfully generated and saved to the server!`);
+            })
+            .catch(error => {
+                alert(`Generation Failed: ${error}`);
+                console.error('API Update Failed:', error);
+            });
+        });
+
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.location.href = 'central-dashboard2.html';
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'guide-login.html';
+        });
+
+        // Initial Data Fetch
+        document.addEventListener('DOMContentLoaded', fetchAssignedTourists);
+    </script>
+</body>
+</html>

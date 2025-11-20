@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Individual/Group Registration - SafeTour Connect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* --- LIGHT/TRUSTWORTHY REGISTRATION PALETTE --- */
+        :root {
+            /* Brand Colors */
+            --color-primary: #0072E1; /* Strong Blue (Trust, CTA) */
+            --color-accent-happy: #FFC300; /* Yellow/Gold (Highlight) */
+            --primary-bg: #F7F9FF; /* Light Blue/Off-White Body BG */
+            --form-bg: #FFFFFF; /* Crisp White Form BG */
+            
+            /* Text & Status */
+            --text-color-dark: #333333;
+            --text-color-soft: #555555;
+            --success-color: #28A745; 
+            --error-color: #FF6347;
+            --info-color: #6C757D; /* Gray/Utility color */
+            --input-border: #E0E0E0;
+            --container-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg), #FFFFFF);
+            color: var(--text-color-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: var(--form-bg);
+            padding: 3rem;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: var(--container-shadow);
+            animation: fadeIn 1.2s ease-in-out;
+            border-top: 5px solid var(--color-primary);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            color: var(--color-primary);
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        /* --- FORM STYLING --- */
+        .form-section {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .form-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            position: relative;
+        }
+        .form-group input, .form-group select {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+        
+        /* Input Base Style */
+        input, select {
+            width: 100%;
+            padding: 1rem;
+            padding-left: 45px; 
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background-color: white; 
+            font-size: 1rem;
+            color: var(--text-color-dark);
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        /* Input Focus Style */
+        input:focus, select:focus {
+            outline: none;
+            border: 1px solid var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 114, 225, 0.3);
+        }
+        
+        /* Input Icon Placement */
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color-soft);
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+        .form-group input:focus + i { color: var(--color-primary); }
+        input::placeholder { color: var(--text-color-soft); }
+        
+        /* Select Arrow */
+        select {
+            padding-left: 1rem; 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23555555" class="bi bi-caret-down-fill" viewBox="0 0 16 16"><path d="M7.247 11.14c.16.29.57.29.73 0l6.23-11.332a.89.89 0 0 0-.74-.808H1.751a.89.89 0 0 0-.74.808l6.23 11.332z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.8rem;
+        }
+        select option {
+            background-color: white;
+            color: var(--text-color-dark);
+        }
+
+        /* Dynamic Member Form Grouping */
+        .member-form h3 {
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--input-border);
+            margin-top: 1.5rem;
+        }
+        .member-form hr {
+            border: none;
+            border-top: 1px solid var(--input-border);
+            margin: 2rem 0;
+        }
+        
+        /* --- BUTTONS --- */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        button, a.btn {
+            width: 100%;
+            padding: 1.2rem; 
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* 1. Primary Register Button */
+        .btn-register {
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 114, 225, 0.4);
+        }
+        .btn-register:hover {
+            background-color: #0056e6;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 114, 225, 0.6);
+        }
+        
+        /* 2. Secondary Login Button */
+        .btn-secondary {
+            background: none;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* 3. Tertiary Home Button */
+        .btn-home {
+            background-color: var(--info-color); 
+            color: white;
+        }
+        .btn-home:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        /* 4. Generate Form Button (Inside input group) */
+        #generate-form-btn {
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 1rem 1.5rem; 
+            font-size: 1rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        #generate-form-btn:hover {
+            background-color: #0056e6;
+            transform: translateY(-2px);
+        }
+
+        /* --- UTILITY & FOOTER --- */
+        .message {
+            color: var(--error-color);
+            font-weight: 600;
+        }
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            color: var(--text-color-soft);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        /* Custom Alert Styling */
+        .custom-alert-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center; z-index: 2000;
+            visibility: hidden; opacity: 0; transition: visibility 0s, opacity 0.3s ease-in-out;
+        }
+        .custom-alert-overlay.visible { visibility: visible; opacity: 1; }
+        .custom-alert-box {
+            background: var(--form-bg);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px; width: 90%;
+            border-top: 5px solid var(--color-primary);
+            color: var(--text-color-dark);
+        }
+        .custom-alert-box h3 { color: var(--color-primary); }
+        .custom-alert-box.error-alert h3 { color: var(--error-color); }
+        .alert-buttons .alert-ok-btn {
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: 5px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem; }
+            .form-group { flex-direction: column; gap: 0; }
+            .form-group input, .form-group select { margin-bottom: 1rem; padding-left: 1rem; }
+            .form-group i { display: none; }
+            h2 { font-size: 1.8rem; }
+            .btn { font-size: 1rem; }
+            #generate-form-btn { padding: 0.9rem; }
+            input, select { padding: 0.8rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-users-cog mr-2"></i> Individual/Group Registration</h2>
+
+        <div class="form-section" id="member-count-section">
+            <div class="form-group">
+                <input type="number" id="member-count" placeholder="Number of Members (1-10)" min="1" max="10" value="1" required />
+                <button id="generate-form-btn">Generate Form</button>
+            </div>
+            <p style="opacity: 0.8; font-size: 0.9rem; text-align: center; color: var(--text-color-soft);">
+                <i class="fas fa-info-circle mr-2"></i> Note: You will be the group admin.
+            </p>
+        </div>
+
+        <form id="individual-registration-form" style="display:none;">
+            <div id="dynamic-form-fields"></div>
+            <div id="error-message" class="message" style="display:none;"></div>
+            <button type="submit" class="btn btn-register"><i class="fas fa-users-cog"></i> Register Group</button>
+        </form>
+        
+        <div class="btn-group">
+            <a href="individual-login.html" class="btn btn-secondary"><i class="fas fa-key"></i> Already have an account? Login</a>
+            <a href="home.html" class="btn btn-home"><i class="fas fa-home"></i> Go to Home</a>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 SafeTour Connect
+    </footer>
+
+    <div id="custom-alert" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <h3 id="alert-title"></h3>
+            <p id="alert-message"></p>
+            <div class="alert-buttons">
+                <button class="alert-ok-btn" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000'; // Server URL
+        
+        const customAlert = document.getElementById('custom-alert');
+        const alertTitle = document.getElementById('alert-title');
+        const alertMessage = document.getElementById('alert-message');
+        const alertOkBtn = document.getElementById('alert-ok');
+
+        function showAlert(title, message, isError = false, redirect = false, redirectUrl = '') {
+            alertTitle.innerHTML = `<i class="fas fa-${isError ? 'exclamation-triangle' : 'check-circle'}"></i> ${title}`;
+            alertTitle.classList.toggle('error-alert', isError);
+            alertMessage.textContent = message;
+            customAlert.querySelector('.custom-alert-box').classList.toggle('error-alert', isError);
+            customAlert.classList.add('visible');
+
+            alertOkBtn.onclick = () => {
+                customAlert.classList.remove('visible');
+                if (redirect) {
+                    window.location.href = redirectUrl;
+                }
+            };
+        }
+
+        document.getElementById('generate-form-btn').addEventListener('click', function() {
+            const memberCountInput = document.getElementById('member-count');
+            const memberCount = parseInt(memberCountInput.value);
+            const dynamicForm = document.getElementById('individual-registration-form');
+            const formFieldsContainer = document.getElementById('dynamic-form-fields');
+            
+            if (memberCount >= 1 && memberCount <= 10 && !isNaN(memberCount)) {
+                formFieldsContainer.innerHTML = '';
+                
+                for (let i = 0; i < memberCount; i++) {
+                    // Determine if the full input style (with icon padding) or simple input style is needed
+                    const inputPadding = window.innerWidth <= 600 ? 'padding-left: 1rem;' : '';
+
+                    const memberFormHTML = `
+                        <div class="member-form">
+                            <h3>Member ${i + 1} Details ${i === 0 ? '(Group Admin)' : ''}</h3>
+                            
+                            <div class="form-group">
+                                <input type="text" name="name" placeholder="Full Name" required style="${inputPadding}" />
+                                <i class="fas fa-user"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="number" name="age" placeholder="Age" required style="${inputPadding}" />
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <select name="gender" required>
+                                    <option value="" disabled selected>Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="text" name="mobile" placeholder="Mobile Number (10 digits)" required style="${inputPadding}" />
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="text" name="emergency" placeholder="Emergency Contact (10 digits)" required style="${inputPadding}" />
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="text" name="city" placeholder="City" required style="${inputPadding}" />
+                                <i class="fas fa-city"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="text" name="destination" placeholder="Destination" required style="${inputPadding}" />
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <select name="cardType" required>
+                                    <option value="" disabled selected>Select Card Type</option>
+                                    <option value="Gold">Gold</option>
+                                    <option value="Platinum">Platinum</option>
+                                    <option value="Diamond">Diamond</option>
+                                </select>
+                            </div>
+                            
+                            ${i === 0 ? `
+                                <h3 style="margin-top:2rem;">Group Admin Credentials</h3>
+                                <div class="form-group">
+                                    <input type="text" name="username" placeholder="Create Group Username" required style="${inputPadding}" />
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="password" placeholder="Create Password (min. 6 chars)" required style="${inputPadding}" />
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${i < memberCount - 1 ? `<hr style="border: 1px solid var(--input-border); margin: 2rem 0;">` : ''}
+                    `;
+                    formFieldsContainer.innerHTML += memberFormHTML;
+                }
+                document.getElementById('member-count-section').style.display = 'none';
+                dynamicForm.style.display = 'block';
+
+            } else {
+                showAlert('Input Error', 'Please enter a valid number of members between 1 and 10.', true);
+                memberCountInput.value = '';
+            }
+        });
+
+        document.getElementById('individual-registration-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formFields = document.querySelectorAll('.member-form');
+            let allGroupMembers = [];
+            let groupAdmin = {};
+
+            let isValid = true;
+            let adminPayload = {};
+            let touristsPayload = [];
+            
+            // Collect all data and perform client-side validation
+            formFields.forEach((form, index) => {
+                // If validation already failed, skip further processing
+                if (!isValid) return; 
+
+                const fields = {
+                    name: form.querySelector('input[name="name"]').value.trim(),
+                    age: parseInt(form.querySelector('input[name="age"]').value),
+                    gender: form.querySelector('select[name="gender"]').value,
+                    mobile: form.querySelector('input[name="mobile"]').value.trim(),
+                    emergency: form.querySelector('input[name="emergency"]').value.trim(),
+                    city: form.querySelector('input[name="city"]').value.trim(),
+                    destination: form.querySelector('input[name="destination"]').value.trim(),
+                    cardType: form.querySelector('select[name="cardType"]').value
+                };
+                
+                // Base Validation (Age, Mobile, Emergency)
+                if (fields.age < 1 || fields.age > 120 || isNaN(fields.age)) {
+                    showAlert('Validation Failed', `Member ${index + 1}: Please enter a valid age (1-120).`, true);
+                    isValid = false; return;
+                }
+                if (!/^\d{10}$/.test(fields.mobile) || !/^\d{10}$/.test(fields.emergency)) {
+                    showAlert('Validation Failed', `Member ${index + 1}: Mobile/Emergency contacts must be 10-digit numbers.`, true);
+                    isValid = false; return;
+                }
+
+                const memberData = { id: 'TOURIST-' + Date.now() + '-' + index, ...fields };
+
+                if (index === 0) {
+                    // Admin Credentials Validation
+                    const username = form.querySelector('input[name="username"]').value.trim();
+                    const password = form.querySelector('input[name="password"]').value;
+
+                    if (!username || !password || password.length < 6) {
+                        showAlert('Validation Failed', 'Admin credentials invalid (min. 6 characters and required).', true);
+                        isValid = false; return;
+                    }
+
+                    // Create Admin payload (for 'guides' collection)
+                    adminPayload = {
+                        name: memberData.name, age: memberData.age, gender: memberData.gender, emergency: memberData.emergency,
+                        username: username, password: password,
+                        groupName: `Group-${memberData.name}`,
+                        groupMembers: formFields.length,
+                        role: 'individual-group'
+                    };
+                    
+                    // Temporarily store admin details locally for member assignment
+                    groupAdmin = { id: 'TEMP_ID', username: username, ...adminPayload };
+
+                    // Add Virtual ID for admin (saved to tourist collection later)
+                    memberData.virtualID = {
+                        id: 'VIRT-' + Date.now().toString().slice(-6),
+                        permissions: 'Live location access',
+                        cardType: memberData.cardType,
+                        name: memberData.name
+                    };
+                    memberData.guideId = 'TEMP_ID'; // Will be replaced by MongoDB's ID
+                    
+                } else if (groupAdmin) {
+                    // Assign subsequent members to the admin's temporary ID
+                    memberData.guideId = groupAdmin.id; 
+                }
+                
+                touristsPayload.push(memberData);
+            });
+
+            if (!isValid) return; 
+            
+            // --- 1. REGISTER THE ADMIN (GUIDE) FIRST ---
+            let registeredAdmin;
+            try {
+                const adminResponse = await fetch(`${API_BASE_URL}/api/register/guide`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(adminPayload)
+                });
+                
+                const adminData = await adminResponse.json();
+
+                if (adminResponse.status === 409) {
+                    showAlert('Registration Failed', 'Username already taken. Please choose another.', true);
+                    return;
+                }
+                if (!adminResponse.ok) {
+                    throw new Error(adminData.message || 'Server error while registering admin.');
+                }
+                registeredAdmin = adminData.guide;
+
+            } catch (error) {
+                showAlert('Registration Failed', error.message || error, true);
+                return;
+            }
+
+            // --- 2. REGISTER ALL MEMBERS (TOURISTS) ---
+            
+            // Replace the temporary guideId on all members with the actual MongoDB _id
+            const finalTouristsPayload = touristsPayload.map(t => ({
+                ...t, 
+                guideId: registeredAdmin._id, // Use actual MongoDB ID
+                // The DB will generate the tourist's final _id
+                // We keep the original 'id' temporarily for frontend structure clarity
+            }));
+            
+            try {
+                const memberResponse = await fetch(`${API_BASE_URL}/api/register/tourist-batch`, { // NOTE: Assumes a new bulk insert endpoint is created
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalTouristsPayload)
+                });
+                
+                if (!memberResponse.ok) {
+                    // CRITICAL: If tourists fail to register, we should delete the registered guide (rollback).
+                    // For this exercise, we will just log the failure.
+                    throw new Error('Server error while registering group members.');
+                }
+                
+                showAlert('Registration Successful!', 'Your Group is registered! You can now login as the group admin.', false, true, 'individual-login.html');
+                
+                document.getElementById('individual-registration-form').reset();
+                document.getElementById('individual-registration-form').style.display = 'none';
+                document.getElementById('member-count-section').style.display = 'flex';
+
+            } catch (error) {
+                 // Clean up the registered guide if member insertion fails
+                 // NOTE: Full rollback requires a DELETE API route for the guide.
+                 showAlert('Registration Failed', error.message || 'Group members could not be saved.', true);
+            }
+        });
+
+        document.getElementById('alert-ok').addEventListener('click', () => {
+             document.getElementById('custom-alert').classList.remove('visible');
+        });
+        
+    </script>
+</body>
+
+</html>
